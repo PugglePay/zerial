@@ -9,5 +9,13 @@ module Zerial
         JSON.load(json_string)
       )
     end
+
+    def maybe
+      Maybe.new(self)
+    end
+
+    def collection
+      CollectionSerializer.new(self)
+    end
   end
 end

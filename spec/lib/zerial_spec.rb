@@ -182,4 +182,49 @@ describe Zerial do
       end
     end
   end
+
+  describe ".maybe and .collection" do
+    let(:record_class) {
+      ImmutableRecord.new(:attr1, :attr2)
+    }
+    let(:serializer) {
+      Zerial::ImmutableRecordSerializer.new(
+        record_class,
+        serializers: {
+          attr1: Zerial::TimestampSerializer.maybe,
+          attr2: Zerial::MoneySerializer.maybe.collection.maybe,
+        }
+      ).collection
+    }
+    it "helps with making combinators" do
+      expect_correct_roundtrip(
+        serializer,
+        [
+          record_class.new(
+            attr1: nil,
+            attr2: nil
+          )
+        ]
+      )
+      expect_correct_roundtrip(
+        serializer,
+        [
+          record_class.new(
+            attr1: Time.current.change(usec: 0),
+            attr2: [Money.new(10, "SEK")]
+          )
+        ]
+      )
+
+      expect_correct_roundtrip(
+        serializer,
+        [
+          record_class.new(
+            attr1: Time.current.change(usec: 0),
+            attr2: [nil]
+          )
+        ]
+      )
+    end
+  end
 end
