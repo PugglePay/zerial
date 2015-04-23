@@ -10,6 +10,7 @@ require "zerial/timestamp_serializer"
 
 require "zerial/collection_serializer"
 require "zerial/immutable_record_serializer"
+require "zerial/maybe"
 
 require "active_support/core_ext"
 

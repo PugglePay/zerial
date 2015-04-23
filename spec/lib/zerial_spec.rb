@@ -138,4 +138,48 @@ describe Zerial do
       )
     end
   end
+
+  describe Zerial::Maybe do
+    context "in combination with CollectionSerializer" do
+      it "only serializes non-nil values" do
+        expect_correct_roundtrip(
+          Zerial::CollectionSerializer.new(
+            Zerial::Maybe.new(Zerial::BigDecimalSerializer)
+          ),
+          [nil, BigDecimal.new("10")]
+        )
+      end
+    end
+
+    context "in combination with ImmutableRecord" do
+      let(:record_class) {
+        ImmutableRecord.new(:attr1, :attr2)
+      }
+      let(:serializer) {
+        Zerial::ImmutableRecordSerializer.new(
+          record_class,
+          serializers: {
+            attr1: Zerial::Maybe.new(Zerial::TimestampSerializer),
+            attr2: Zerial::Maybe.new(Zerial::MoneySerializer),
+          }
+        )
+      }
+      it "only serializes non-nil values" do
+        expect_correct_roundtrip(
+          serializer,
+          record_class.new(
+            attr1: nil,
+            attr2: nil
+          )
+        )
+        expect_correct_roundtrip(
+          serializer,
+          record_class.new(
+            attr1: Time.current.change(usec: 0),
+            attr2: Money.new(10, "SEK")
+          )
+        )
+      end
+    end
+  end
 end
